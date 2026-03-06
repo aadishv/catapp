@@ -9,6 +9,7 @@ export default createHandler(() => (
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>catapp</title>
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
           {assets}
         </head>
         <body>
