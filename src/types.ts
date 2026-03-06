@@ -1,6 +1,6 @@
 export type Photo = {
   id: string;
-  taken_at: string;
+  taken_at: string | null;
   title: string;
   w: number;
   h: number;

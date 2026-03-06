@@ -1,22 +1,95 @@
 @import "tailwindcss";
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --bg:                #ffffff;
+  --bar-bg:            #ffffff;
+  --cell-bg:           #ebebeb;
+  --fg:                #111111;
+  --fg-dim:            rgba(0, 0, 0, 0.35);
+  --fg-faint:          rgba(0, 0, 0, 0.18);
+  --pill-bg:           rgba(0, 0, 0, 0.045);
+  --pill-border:       rgba(0, 0, 0, 0.09);
+  --pill-border-focus: rgba(0, 0, 0, 0.22);
+  --placeholder:       rgba(0, 0, 0, 0.28);
+  --scrollbar:         rgba(0, 0, 0, 0.12);
+  --scrollbar-hover:   rgba(0, 0, 0, 0.25);
 }
 
-html,
-body {
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:                #000000;
+    --bar-bg:            #000000;
+    --cell-bg:           #141414;
+    --fg:                #ffffff;
+    --fg-dim:            rgba(255, 255, 255, 0.35);
+    --fg-faint:          rgba(255, 255, 255, 0.18);
+    --pill-bg:           rgba(255, 255, 255, 0.06);
+    --pill-border:       rgba(255, 255, 255, 0.09);
+    --pill-border-focus: rgba(255, 255, 255, 0.22);
+    --placeholder:       rgba(255, 255, 255, 0.25);
+    --scrollbar:         rgba(255, 255, 255, 0.1);
+    --scrollbar-hover:   rgba(255, 255, 255, 0.2);
+  }
+}
+
+html, body, #app {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #0f0f0f;
-  color: #fff;
+  background: var(--bg);
+  color: var(--fg);
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-#app {
-  height: 100%;
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+
+/* Search pill */
+.search-pill {
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  border-radius: 9999px;
+  transition: border-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  height: 34px;
+  width: 100%;
+  gap: 8px;
+}
+.search-pill:focus-within {
+  border-color: var(--pill-border-focus);
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--fg);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  width: 100%;
+  min-width: 0;
+}
+.search-input::placeholder { color: var(--placeholder); }
+.search-input::-webkit-search-cancel-button { display: none; }
+
+/* Top bar */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: 48px;
+  background: var(--bar-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
 }

@@ -1,9 +1,5 @@
-import { createSignal, Show, createEffect } from "solid-js";
-import {
-  vectorSearch,
-  loadStage,
-  loadPercent,
-} from "../services/vector-search";
+import { createSignal, Show } from "solid-js";
+import { vectorSearch, loadStage } from "../services/vector-search";
 import type { VectorHit } from "../types";
 
 type Props = {
@@ -17,20 +13,17 @@ export function SearchBar(props: Props) {
   const [workerStarted, setWorkerStarted] = createSignal(false);
 
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let inputRef!: HTMLInputElement;
 
   const stage = loadStage;
-  const pct = loadPercent;
 
-  const stageLabel = () => {
-    switch (stage()) {
-      case "model": return `Loading model… ${pct()}%`;
-      case "index": return `Loading index… ${pct()}%`;
-      case "ready": return null;
-      default: return null;
-    }
+  const statusText = (): string | null => {
+    if (error()) return error();
+    if (searching()) return "searching…";
+    if (stage() === "model" || stage() === "index") return "loading…";
+    return null;
   };
 
-  // Start worker when user first focuses or types
   const ensureWorker = () => {
     if (!workerStarted()) {
       setWorkerStarted(true);
@@ -41,17 +34,9 @@ export function SearchBar(props: Props) {
   };
 
   const runSearch = async (q: string) => {
-    if (!q.trim()) {
-      props.onResults(null);
-      return;
-    }
+    if (!q.trim()) { props.onResults(null); return; }
     if (!vectorSearch.isReady) {
-      // Worker still loading — wait for it
-      try {
-        await vectorSearch.init();
-      } catch {
-        return;
-      }
+      try { await vectorSearch.init(); } catch { return; }
     }
     setSearching(true);
     setError(null);
@@ -70,67 +55,49 @@ export function SearchBar(props: Props) {
     setQuery(val);
     ensureWorker();
     if (debounceTimer) clearTimeout(debounceTimer);
-    if (!val.trim()) {
-      props.onResults(null);
-      return;
-    }
+    if (!val.trim()) { props.onResults(null); return; }
     debounceTimer = setTimeout(() => void runSearch(val), 400);
   };
 
   const handleClear = () => {
     setQuery("");
     props.onResults(null);
+    inputRef.focus();
   };
 
   return (
-    <div class="flex flex-col gap-1 w-full max-w-xl">
-      <div class="relative flex items-center">
-        <span class="absolute left-3 text-white/40 text-sm select-none pointer-events-none">
-          🔍
-        </span>
+    <div style={{ width: "min(320px, calc(100vw - 32px))", position: "relative" }}>
+      <div class="search-pill">
         <input
+          ref={inputRef}
           type="search"
+          class="search-input"
           value={query()}
           onInput={handleInput}
           onFocus={ensureWorker}
-          placeholder="Search photos…"
-          class="w-full bg-white/10 text-white placeholder-white/40 rounded-lg pl-9 pr-8 py-2 text-sm outline-none focus:ring-2 focus:ring-white/30 transition"
+          placeholder="search"
           autocomplete="off"
           spellcheck={false}
         />
         <Show when={query()}>
           <button
-            class="absolute right-2 text-white/40 hover:text-white/80 text-lg leading-none"
             onClick={handleClear}
-            aria-label="Clear search"
+            aria-label="Clear"
+            style={{ color: "var(--fg-dim)", background: "none", border: "none", cursor: "pointer", "font-size": "18px", "line-height": "1", padding: "0", "flex-shrink": "0" }}
           >
             ×
           </button>
         </Show>
       </div>
 
-      {/* Status row */}
-      <Show when={stageLabel() || searching() || error()}>
-        <p class="text-xs text-white/50 px-1">
-          {error() ? (
-            <span class="text-red-400">{error()}</span>
-          ) : searching() ? (
-            "Searching…"
-          ) : (
-            stageLabel()
-          )}
-        </p>
+      {/* Absolutely positioned so they never affect the pill's layout */}
+      <Show when={statusText()}>
+        <span style={{ position: "absolute", top: "calc(100% + 5px)", left: "50%", transform: "translateX(-50%)", "font-size": "10px", color: error() ? "rgba(200,60,60,0.9)" : "var(--fg-faint)", "white-space": "nowrap", "letter-spacing": "0.02em" }}>
+          {statusText()}
+        </span>
       </Show>
 
-      {/* Progress bar while model/index loading */}
-      <Show when={stage() === "model" || stage() === "index"}>
-        <div class="h-0.5 w-full bg-white/10 rounded-full overflow-hidden">
-          <div
-            class="h-full bg-white/60 transition-all duration-300"
-            style={{ width: `${pct()}%` }}
-          />
-        </div>
-      </Show>
+
     </div>
   );
 }
