@@ -3,15 +3,10 @@ import { MasonryGrid } from "~/components/MasonryGrid";
 import { SearchBar } from "~/components/SearchBar";
 import { Lightbox } from "~/components/Lightbox";
 import type { Photo, VectorHit } from "~/types";
-
-async function fetchPhotos(): Promise<Photo[]> {
-  const res = await fetch("/index.json");
-  if (!res.ok) throw new Error(`${res.status}`);
-  return res.json() as Promise<Photo[]>;
-}
+import { loadPhotoIndex } from "~/services/photo-index";
 
 export default function Home() {
-  const [photos] = createResource(fetchPhotos);
+  const [photos] = createResource(loadPhotoIndex);
   const [hits, setHits] = createSignal<VectorHit[] | null>(null);
   const [lightboxIndex, setLightboxIndex] = createSignal<number | null>(null);
 
