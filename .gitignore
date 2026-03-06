@@ -2,3 +2,6 @@ node_modules/
 .output/
 .vinxi/
 dist/
+
+# generated at deploy time from SQLite
+public/index.json
