@@ -85,11 +85,13 @@ export default function Home() {
       </Show>
 
       <Show when={photos() && !photos.loading}>
-        <MasonryGrid
-          photos={visiblePhotos()}
-          topPadding={48}
-          onSelect={(_photo, index) => setLightboxIndex(index)}
-        />
+        <div style={{ position: "fixed", top: "48px", left: 0, right: 0, bottom: 0 }}>
+          <MasonryGrid
+            photos={visiblePhotos()}
+            topPadding={0}
+            onSelect={(_photo, index) => setLightboxIndex(index)}
+          />
+        </div>
       </Show>
 
       <Show when={activeLightboxPhoto()}>
