@@ -1,9 +1,10 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, Show, onMount } from "solid-js";
 import { vectorSearch, loadStage } from "../services/vector-search";
 import type { VectorHit } from "../types";
 
 type Props = {
   onResults: (hits: VectorHit[] | null) => void;
+  registerFocus?: (fn: () => void) => void;
 };
 
 export function SearchBar(props: Props) {
@@ -14,6 +15,8 @@ export function SearchBar(props: Props) {
 
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
   let inputRef!: HTMLInputElement;
+
+  onMount(() => props.registerFocus?.(() => { inputRef.focus(); inputRef.select(); }));
 
   const stage = loadStage;
 

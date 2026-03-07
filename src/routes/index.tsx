@@ -1,4 +1,4 @@
-import { createSignal, createResource, Show, createMemo } from "solid-js";
+import { createSignal, createResource, Show, createMemo, onMount, onCleanup } from "solid-js";
 import { MasonryGrid } from "~/components/MasonryGrid";
 import { SearchBar } from "~/components/SearchBar";
 import { Lightbox } from "~/components/Lightbox";
@@ -19,6 +19,24 @@ export default function Home() {
     return h.map((hit) => byId.get(hit.photo_id)).filter((p): p is Photo => p !== undefined);
   });
 
+  let focusSearch: (() => void) | undefined;
+
+  onMount(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (lightboxIndex() !== null) return;
+      const meta = e.metaKey || e.ctrlKey;
+      const tag = (e.target as HTMLElement).tagName;
+      const inInput = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable;
+
+      if ((meta && (e.key === "f" || e.key === "k")) || (!inInput && e.key === "k")) {
+        e.preventDefault();
+        focusSearch?.();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    onCleanup(() => window.removeEventListener("keydown", handler));
+  });
+
   const closeLightbox = () => setLightboxIndex(null);
   const prevPhoto = () => setLightboxIndex((i) => (i !== null && i > 0 ? i - 1 : i));
   const nextPhoto = () =>
@@ -33,7 +51,7 @@ export default function Home() {
     <div style={{ height: "100vh", background: "var(--bg)" }}>
       {/* Fixed opaque top bar */}
       <div class="top-bar">
-        <SearchBar onResults={setHits} />
+        <SearchBar onResults={setHits} registerFocus={(fn) => { focusSearch = fn; }} />
       </div>
 
       {/* Grid — padded below the bar */}
