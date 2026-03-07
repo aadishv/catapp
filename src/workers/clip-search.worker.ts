@@ -1,9 +1,12 @@
 import {
   CLIPTextModelWithProjection,
   AutoTokenizer,
+  env,
   type PreTrainedModel,
   type PreTrainedTokenizer,
 } from "@xenova/transformers";
+
+env.allowLocalModels = false;
 import type { WorkerMsg } from "../types";
 
 const MODEL_ID = "Xenova/clip-vit-base-patch32";
