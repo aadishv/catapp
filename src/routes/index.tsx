@@ -19,6 +19,20 @@ export default function Home() {
     return h.map((hit) => byId.get(hit.photo_id)).filter((p): p is Photo => p !== undefined);
   });
 
+  const clearAllCaches = async () => {
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+    await new Promise<void>((resolve) => {
+      const req = indexedDB.deleteDatabase("catapp-vector");
+      req.onsuccess = () => resolve();
+      req.onerror = () => resolve();
+      req.onblocked = () => resolve();
+    });
+    window.location.reload();
+  };
+
   const shuffle = () => {
     const all = photos();
     if (!all) return;
@@ -59,6 +73,14 @@ export default function Home() {
       {/* Fixed opaque top bar */}
       <div class="top-bar">
         <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+          <button
+            onClick={() => void clearAllCaches()}
+            title="Clear all caches and reload"
+            aria-label="Clear all caches"
+            style={{ background: "none", border: "none", cursor: "pointer", "font-size": "17px", color: "var(--fg-dim)", padding: "0", "flex-shrink": "0", "line-height": "1" }}
+          >
+            ↺
+          </button>
           <SearchBar onResults={setHits} registerFocus={(fn) => { focusSearch = fn; }} />
           <button
             onClick={shuffle}
