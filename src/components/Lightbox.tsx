@@ -28,6 +28,19 @@ export function Lightbox(props: Props) {
       if (e.key === "Escape") props.onClose();
       if (e.key === "ArrowLeft") props.onPrev();
       if (e.key === "ArrowRight") props.onNext();
+      if ((e.metaKey || e.ctrlKey) && e.key === "c") {
+        const url = src();
+        if (!url) return;
+        void (async () => {
+          try {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+          } catch {
+            // clipboard API unavailable or permission denied — silently ignore
+          }
+        })();
+      }
     };
     window.addEventListener("keydown", handler);
     onCleanup(() => window.removeEventListener("keydown", handler));

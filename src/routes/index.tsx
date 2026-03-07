@@ -7,17 +7,27 @@ import { loadPhotoIndex } from "~/services/photo-index";
 
 export default function Home() {
   const [photos] = createResource(loadPhotoIndex);
+  const [shuffled, setShuffled] = createSignal<Photo[] | null>(null);
   const [hits, setHits] = createSignal<VectorHit[] | null>(null);
   const [lightboxIndex, setLightboxIndex] = createSignal<number | null>(null);
 
+  const basePhotos = createMemo<Photo[]>(() => shuffled() ?? photos() ?? []);
+
   const visiblePhotos = createMemo<Photo[]>(() => {
-    const all = photos();
-    if (!all) return [];
+    const base = basePhotos();
+    if (!base.length) return [];
     const h = hits();
-    if (!h) return all;
-    const byId = new Map<string, Photo>(all.map((p) => [p.id, p]));
+    if (!h) return base;
+    const byId = new Map<string, Photo>(base.map((p) => [p.id, p]));
     return h.map((hit) => byId.get(hit.photo_id)).filter((p): p is Photo => p !== undefined);
   });
+
+  const shuffle = () => {
+    const all = photos();
+    if (!all) return;
+    setShuffled([...all].sort(() => Math.random() - 0.5));
+    setLightboxIndex(null);
+  };
 
   let focusSearch: (() => void) | undefined;
 
@@ -28,7 +38,7 @@ export default function Home() {
       const tag = (e.target as HTMLElement).tagName;
       const inInput = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable;
 
-      if ((meta && (e.key === "f" || e.key === "k")) || (!inInput && e.key === "k")) {
+      if ((meta && (e.key === "f" || e.key === "k")) || (!inInput && e.key === "/")) {
         e.preventDefault();
         focusSearch?.();
       }
@@ -51,7 +61,17 @@ export default function Home() {
     <div style={{ height: "100vh", background: "var(--bg)" }}>
       {/* Fixed opaque top bar */}
       <div class="top-bar">
-        <SearchBar onResults={setHits} registerFocus={(fn) => { focusSearch = fn; }} />
+        <div style={{ display: "flex", "align-items": "center", gap: "8px" }}>
+          <SearchBar onResults={setHits} registerFocus={(fn) => { focusSearch = fn; }} />
+          <button
+            onClick={shuffle}
+            title="Shuffle"
+            aria-label="Shuffle photos"
+            style={{ background: "none", border: "none", cursor: "pointer", "font-size": "17px", color: "var(--fg-dim)", padding: "0", "flex-shrink": "0", "line-height": "1" }}
+          >
+            🎲
+          </button>
+        </div>
       </div>
 
       {/* Grid — padded below the bar */}
