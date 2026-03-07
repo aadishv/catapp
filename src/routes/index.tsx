@@ -3,29 +3,26 @@ import { MasonryGrid } from "~/components/MasonryGrid";
 import { SearchBar } from "~/components/SearchBar";
 import { Lightbox } from "~/components/Lightbox";
 import type { Photo, VectorHit } from "~/types";
-import { loadPhotoIndex } from "~/services/photo-index";
+import { loadPhotoIndex, shufflePhotoIndex } from "~/services/photo-index";
 
 export default function Home() {
-  const [photos] = createResource(loadPhotoIndex);
-  const [shuffled, setShuffled] = createSignal<Photo[] | null>(null);
+  const [photos, { mutate }] = createResource(loadPhotoIndex);
   const [hits, setHits] = createSignal<VectorHit[] | null>(null);
   const [lightboxIndex, setLightboxIndex] = createSignal<number | null>(null);
 
-  const basePhotos = createMemo<Photo[]>(() => shuffled() ?? photos() ?? []);
-
   const visiblePhotos = createMemo<Photo[]>(() => {
-    const base = basePhotos();
-    if (!base.length) return [];
+    const all = photos();
+    if (!all) return [];
     const h = hits();
-    if (!h) return base;
-    const byId = new Map<string, Photo>(base.map((p) => [p.id, p]));
+    if (!h) return all;
+    const byId = new Map<string, Photo>(all.map((p) => [p.id, p]));
     return h.map((hit) => byId.get(hit.photo_id)).filter((p): p is Photo => p !== undefined);
   });
 
   const shuffle = () => {
     const all = photos();
     if (!all) return;
-    setShuffled([...all].sort(() => Math.random() - 0.5));
+    void shufflePhotoIndex(all).then(mutate);
     setLightboxIndex(null);
   };
 

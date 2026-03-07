@@ -40,3 +40,18 @@ export async function loadPhotoIndex(): Promise<Photo[]> {
 
   return photos;
 }
+
+export async function shufflePhotoIndex(current: Photo[]): Promise<Photo[]> {
+  const shuffled = [...current].sort(() => Math.random() - 0.5);
+  try {
+    const db = await openIdb();
+    await new Promise<void>((resolve, reject) => {
+      const req = db.transaction(IDB_STORE, "readwrite").objectStore(IDB_STORE).put(shuffled, KEY);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    // IDB write failed — shuffled order will still apply in-memory
+  }
+  return shuffled;
+}
