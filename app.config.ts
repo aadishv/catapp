@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   ssr: false,
   server: {
-    preset: "static",
+    preset: "node-server",
     prerender: {
       routes: ["/"],
     },
