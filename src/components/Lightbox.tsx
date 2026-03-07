@@ -29,6 +29,7 @@ export function Lightbox(props: Props) {
       if (e.key === "ArrowLeft") props.onPrev();
       if (e.key === "ArrowRight") props.onNext();
       if ((e.metaKey || e.ctrlKey) && e.key === "c") {
+        e.preventDefault();
         const url = src();
         if (!url) return;
         void (async () => {

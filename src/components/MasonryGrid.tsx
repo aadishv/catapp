@@ -105,7 +105,7 @@ export function MasonryGrid(props: Props) {
 
   return (
     <div ref={containerRef} class="w-full h-full">
-      <div ref={scrollRef} class="w-full h-full overflow-y-auto" style={{ "padding-top": `${props.topPadding ?? 0}px` }}>
+      <div ref={scrollRef} class="w-full h-full overflow-y-auto" style={{ "padding-top": `${props.topPadding ?? 0}px`, "scrollbar-width": "thin" }}>
         <div
           style={{
             height: `${virtualizer.getTotalSize()}px`,
